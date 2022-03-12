@@ -1,3 +1,3 @@
-Barcode Generator
+# Barcode Generator
 
 Built with Gatsby!
