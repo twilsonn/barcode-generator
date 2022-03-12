@@ -31,7 +31,7 @@ const Sidebar: React.FC = () => {
           ></textarea>
         </div>
 
-        <div className="grid grid-cols-5 gap-4 mb-2 select-none">
+        <div className="grid grid-cols-5 gap-2 mb-2 select-none">
           <button
             type="button"
             className="bg-white text-black px-3 py-4 text-center border border-black"
