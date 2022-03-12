@@ -1,20 +1,58 @@
-import React from "react";
+import { v4 as uuid } from "uuid";
+import { useAtom } from "jotai";
+import React, { ChangeEvent, useDebugValue, useState } from "react";
+import { barcodesAtom, BarcodeType, barcodeTypes } from "../../store";
 
 const Sidebar: React.FC = () => {
+  const [barcodes, setBarcodes] = useAtom(barcodesAtom);
+  const [barcodeInput, setBarcodeInput] = useState("");
+  const [barcodeTypeInput, setBarcodeTypeInput] = useState<BarcodeType>();
+
+  const changeBarcodeTypeInput = (e: ChangeEvent<HTMLSelectElement>) =>
+    setBarcodeTypeInput(e.target.value as BarcodeType);
+
   return (
     <aside className="fixed w-1/4 h-screen bg-stone-100 border-r border-stone-300 p-4">
       <header className="prose pb-4 select-none">
         <h1>Barcode Generator</h1>
       </header>
-      <form>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+
+          if (!barcodeInput || !barcodeTypeInput) {
+            return;
+          }
+
+          setBarcodes(
+            barcodeInput.split("\n").map((b) => {
+              return {
+                id: uuid(),
+                value: b,
+                type: barcodeTypeInput,
+              };
+            })
+          );
+        }}
+      >
         <div className="flex flex-col mb-2">
           <label htmlFor="barcode-type" className="select-none">
             Barcode Type
           </label>
-          <select name="barcode-type" id="barcode-type" className="form-select">
-            <option value="test">test</option>
-            <option value="test">test</option>
-            <option value="test">test</option>
+          <select
+            name="barcode-type"
+            id="barcode-type"
+            className="form-select"
+            onChange={changeBarcodeTypeInput}
+            value={barcodeTypeInput}
+          >
+            {barcodeTypes.map((type) => {
+              return (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              );
+            })}
           </select>
         </div>
 
@@ -28,6 +66,7 @@ const Sidebar: React.FC = () => {
             className="form-textarea max-h-96"
             cols={20}
             rows={10}
+            onChange={(e) => setBarcodeInput(e.target.value)}
           ></textarea>
         </div>
 
@@ -40,7 +79,7 @@ const Sidebar: React.FC = () => {
           </button>
 
           <button
-            type="button"
+            type="submit"
             className="col-span-4 bg-black text-white px-3 py-4 text-center border border-black"
           >
             Generate
