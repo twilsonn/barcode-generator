@@ -9,7 +9,7 @@ const useResize = (myRef: React.RefObject<any>) => {
       setWidth(myRef.current.offsetWidth);
       setHeight(myRef.current.offsetHeight);
     };
-
+    handleResize();
     window.addEventListener("resize", handleResize);
 
     return () => {
