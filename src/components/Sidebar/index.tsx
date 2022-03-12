@@ -6,15 +6,20 @@ import { barcodesAtom, BarcodeType, barcodeTypes } from "../../store";
 const Sidebar: React.FC = () => {
   const [barcodes, setBarcodes] = useAtom(barcodesAtom);
   const [barcodeInput, setBarcodeInput] = useState("");
-  const [barcodeTypeInput, setBarcodeTypeInput] = useState<BarcodeType>();
+  const [barcodeTypeInput, setBarcodeTypeInput] =
+    useState<BarcodeType>("code128");
 
   const changeBarcodeTypeInput = (e: ChangeEvent<HTMLSelectElement>) =>
     setBarcodeTypeInput(e.target.value as BarcodeType);
 
   return (
-    <aside className="fixed w-1/4 h-screen bg-stone-100 border-r border-stone-300 p-4">
+    <aside className="side-bar fixed w-1/4 h-screen bg-stone-100 border-r border-stone-300 p-4">
       <header className="prose pb-4 select-none">
-        <h1>Barcode Generator</h1>
+        <h1>
+          Barcode
+          <br />
+          Generator
+        </h1>
       </header>
       <form
         onSubmit={(e) => {
@@ -25,13 +30,16 @@ const Sidebar: React.FC = () => {
           }
 
           setBarcodes(
-            barcodeInput.split("\n").map((b) => {
-              return {
-                id: uuid(),
-                value: b,
-                type: barcodeTypeInput,
-              };
-            })
+            barcodeInput
+              .replace(/(^[ \t]*\n)/gm, "")
+              .split("\n")
+              .map((b) => {
+                return {
+                  id: uuid(),
+                  value: b,
+                  type: barcodeTypeInput,
+                };
+              })
           );
         }}
       >
@@ -86,6 +94,8 @@ const Sidebar: React.FC = () => {
           </button>
         </div>
       </form>
+
+      <div className="text-right">Generated {barcodes.length} barcodes</div>
     </aside>
   );
 };
