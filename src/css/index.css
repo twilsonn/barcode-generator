@@ -5,3 +5,13 @@
 html {
   @apply min-h-screen overflow-auto;
 }
+
+@media print {
+  .side-bar {
+    @apply hidden;
+  }
+
+  .generator {
+    @apply w-full ml-0;
+  }
+}
