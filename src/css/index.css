@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 html {
-  @apply min-h-screen overflow-auto;
+  @apply min-h-screen overflow-x-hidden overflow-y-auto;
 }
 
 @media print {
