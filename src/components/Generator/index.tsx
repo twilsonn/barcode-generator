@@ -16,26 +16,28 @@ const Barcode: React.FC<
 > = (props) => {
   const { value, id } = props;
   const [maxWidth, setMaxWidth] = useAtom(maxBarcodeWidthAtom);
+  const [url, setUrl] = useState("");
 
   useLayoutEffect(() => {
     try {
-      // The return value is the canvas element
-      let canvas = bwipJS.toCanvas(id, {
+      let canvas = document.createElement("canvas");
+      bwipJS.toCanvas(canvas, {
         bcid: "code128", // Barcode type
         text: value, // Text to encode
-        scale: 3, // 3x scaling factor
-        height: 10, // Bar height, in millimeters
+        scale: 2, // 3x scaling factor
+        // height: 20, // Bar height, in millimeters
         includetext: true, // Show human-readable text
         textxalign: "center", // Always good to set this
       });
 
+      setUrl(canvas.toDataURL("image/png"));
       setMaxWidth(Math.max(canvas.width, maxWidth));
     } catch (e) {
       // `e` may be a string or Error object
     }
   });
 
-  return <canvas id={id}></canvas>;
+  return <img id={id} src={url} />;
 };
 
 const Generator: React.FC = () => {
@@ -45,7 +47,7 @@ const Generator: React.FC = () => {
   const ref = useRef<HTMLDivElement>(null);
   const { width, height } = useResize(ref);
 
-  const columns = Math.floor(width / (maxWidth + 64));
+  const columns = Math.floor(width / (maxWidth + 32));
 
   return (
     <main className="generator w-3/4 ml-[25%] min-h-screen p-4">
@@ -54,13 +56,18 @@ const Generator: React.FC = () => {
           component="ul"
           columns={columns}
           columnWidth={maxWidth}
-          gutterWidth={64}
-          gutterHeight={64}
-          duration={10}
+          gutterWidth={32}
+          gutterHeight={32}
+          duration={200}
           children={barcodes.map((b) => {
             return (
               <li key={b.id}>
-                <Barcode id={b.id} value={b.value} />
+                <div
+                  className="flex justify-center"
+                  style={{ width: maxWidth }}
+                >
+                  <Barcode id={b.id} value={b.value} />
+                </div>
               </li>
             );
           })}
