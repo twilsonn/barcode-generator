@@ -1,16 +1,57 @@
 import { v4 as uuid } from "uuid";
 import { useAtom } from "jotai";
-import React, { ChangeEvent, useDebugValue, useState } from "react";
-import { barcodesAtom, BarcodeType, barcodeTypes } from "../../store";
+import React, { ChangeEvent, FormEvent, useState } from "react";
+import {
+  barcodesAtom,
+  BarcodeType,
+  barcodeTypes,
+  maxBarcodeHeightAtom,
+  maxBarcodeWidthAtom,
+} from "../../store";
+
+import { Select, TextArea, Button, Range } from "../FormElements";
 
 const Sidebar: React.FC = () => {
   const [barcodes, setBarcodes] = useAtom(barcodesAtom);
+  const [maxWidth, setMaxWidth] = useAtom(maxBarcodeWidthAtom);
+  const [maxHeight, setMaxHeight] = useAtom(maxBarcodeHeightAtom);
+
   const [barcodeInput, setBarcodeInput] = useState("");
+
   const [barcodeTypeInput, setBarcodeTypeInput] =
     useState<BarcodeType>("code128");
+  const [barcodeSizeInput, setBarcodeSizeInput] = useState<string>("3");
 
   const changeBarcodeTypeInput = (e: ChangeEvent<HTMLSelectElement>) =>
     setBarcodeTypeInput(e.target.value as BarcodeType);
+
+  const changeBarcodeSizeInput = (e: ChangeEvent<HTMLInputElement>) =>
+    setBarcodeSizeInput(e.target.value);
+
+  const submit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!barcodeInput || !barcodeTypeInput) {
+      return;
+    }
+
+    setMaxWidth(0);
+    setMaxHeight(0);
+
+    setBarcodes(
+      barcodeInput
+        .replace(/(^[ \t]*\n)/gm, "")
+        .split("\n")
+        .map((b) => {
+          return {
+            id: uuid(),
+            value: b,
+            type: barcodeTypeInput,
+            size: parseInt(barcodeSizeInput),
+          };
+        })
+    );
+  };
 
   return (
     <aside className="side-bar fixed w-1/4 h-screen bg-stone-100 border-r border-stone-300 p-4">
@@ -20,82 +61,108 @@ const Sidebar: React.FC = () => {
           <br />
           Generator
         </h1>
+        {barcodeTypeInput}
       </header>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
+      <form onSubmit={submit}>
+        <Select
+          id="barcode-type"
+          title="Barcode Type"
+          value={barcodeTypeInput}
+          onChange={changeBarcodeTypeInput}
+        >
+          {barcodeTypes.map((type) => {
+            return (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            );
+          })}
+        </Select>
 
-          if (!barcodeInput || !barcodeTypeInput) {
-            return;
-          }
+        <TextArea
+          id="barcode-input"
+          title="Text input (one code per line)"
+          className="max-h-96"
+          cols={20}
+          rows={10}
+          onChange={(e) => setBarcodeInput(e.target.value)}
+        />
 
-          setBarcodes(
-            barcodeInput
-              .replace(/(^[ \t]*\n)/gm, "")
-              .split("\n")
-              .map((b) => {
-                return {
-                  id: uuid(),
-                  value: b,
-                  type: barcodeTypeInput,
-                };
-              })
-          );
-        }}
-      >
-        <div className="flex flex-col mb-2">
-          <label htmlFor="barcode-type" className="select-none">
-            Barcode Type
-          </label>
-          <select
-            name="barcode-type"
-            id="barcode-type"
-            className="form-select"
-            onChange={changeBarcodeTypeInput}
-            value={barcodeTypeInput}
-          >
-            {barcodeTypes.map((type) => {
-              return (
-                <option key={type} value={type}>
-                  {type}
-                </option>
-              );
-            })}
-          </select>
-        </div>
+        <Range
+          id="barcode-size"
+          name="barcode-size"
+          value={barcodeSizeInput}
+          onChange={changeBarcodeSizeInput}
+          title="Barcode Size"
+          min="1"
+          max="10"
+        />
 
-        <div className="flex flex-col mb-2">
-          <label htmlFor="barcode-input" className="select-none">
-            Text input (one code per line)
-          </label>
-          <textarea
-            name="barcode-input"
-            id="barcode-input"
-            className="form-textarea max-h-96"
-            cols={20}
-            rows={10}
-            onChange={(e) => setBarcodeInput(e.target.value)}
-          ></textarea>
+        <p
+          className="text-right text-sm hover:text-blue-600 select-none cursor-pointer mb-2"
+          data-bs-toggle="collapse"
+          data-bs-target="#moreOptions"
+          aria-expanded="false"
+          aria-controls="moreOptions"
+        >
+          More Options
+        </p>
+
+        <div className="collapse" id="moreOptions">
+          <div className="block pb-4">
+            <Range
+              id="barcode-height"
+              name="barcode-height"
+              value={barcodeSizeInput}
+              onChange={changeBarcodeSizeInput}
+              title="Barcode Height"
+              min="1"
+              max="10"
+              disabled={barcodeTypeInput === "qrcode"}
+            />
+
+            <Range
+              id="barcode-grid-columns"
+              name="barcode-grid-columns"
+              value={barcodeSizeInput}
+              onChange={changeBarcodeSizeInput}
+              title="Grid Columns"
+              min="1"
+              max="10"
+            />
+
+            <Range
+              id="barcode-grid-gap"
+              name="barcode-grid-gap"
+              value={barcodeSizeInput}
+              onChange={changeBarcodeSizeInput}
+              title="Grid Gap"
+              min="1"
+              max="10"
+            />
+          </div>
         </div>
 
         <div className="grid grid-cols-5 gap-2 mb-2 select-none">
-          <button
+          <Button
             type="button"
-            className="bg-white text-black px-3 py-4 text-center border border-black"
-          >
-            Clear
-          </button>
-
-          <button
-            type="submit"
-            className="col-span-4 bg-black text-white px-3 py-4 text-center border border-black"
-          >
-            Generate
-          </button>
+            title="Clear"
+            buttonType="secondary"
+            buttonInputType="button"
+          />
+          <Button
+            type="button"
+            title="Generate"
+            buttonInputType="submit"
+            buttonType="primary"
+            className="col-span-4"
+          />
         </div>
       </form>
 
-      <div className="text-right">Generated {barcodes.length} barcodes</div>
+      {barcodes.length > 0 && (
+        <div className="text-right">Generated {barcodes.length} barcodes</div>
+      )}
     </aside>
   );
 };
