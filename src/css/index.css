@@ -6,7 +6,18 @@ html {
   @apply min-h-screen overflow-x-hidden overflow-y-auto;
 }
 
+@page {
+  size: A4;
+  margin: 0;
+}
+
 @media print {
+  html,
+  body {
+    width: 210mm;
+    height: 297mm;
+  }
+
   .side-bar {
     @apply hidden;
   }
