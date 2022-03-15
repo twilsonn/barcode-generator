@@ -3,6 +3,7 @@ import { useAtom } from "jotai";
 import {
   Barcode,
   barcodesAtom,
+  BarcodeType,
   maxBarcodeHeightAtom,
   maxBarcodeWidthAtom,
 } from "../../store";
@@ -22,30 +23,32 @@ const ReactBarcode: React.FC<
   > &
     Barcode
 > = (props) => {
-  const { value, id, type, size } = props;
+  const { value, id, type, size, height } = props;
   const [maxWidth, setMaxWidth] = useAtom(maxBarcodeWidthAtom);
   const [maxHeight, setMaxHeight] = useAtom(maxBarcodeHeightAtom);
 
   const [url, setUrl] = useState("");
 
+  const disabledHeight: BarcodeType[] = ["qrcode", "azteccode"];
+
   useLayoutEffect(() => {
     try {
       let canvas = document.createElement("canvas");
+
       bwipJS.toCanvas(canvas, {
-        bcid: type, // Barcode type
-        text: value, // Text to encode
-        scale: size || 2, // 3x scaling factor
-        // height: 20, // Bar height, in millimeters
-        includetext: true, // Show human-readable text
-        textxalign: "center", // Always good to set this
+        bcid: type,
+        text: value,
+        scale: size || 2,
+        width: 25,
+        height: disabledHeight.includes(type) ? 25 : height,
+        includetext: true,
+        textxalign: "center",
       });
 
       setUrl(canvas.toDataURL("image/png"));
       setMaxWidth(Math.max(canvas.width, maxWidth));
-      setMaxHeight(Math.max(canvas.width, maxHeight));
-    } catch (e) {
-      // `e` may be a string or Error object
-    }
+      setMaxHeight(Math.max(canvas.height, maxHeight));
+    } catch (e) {}
   });
 
   return <img id={id} src={url} />;
@@ -84,6 +87,7 @@ const Generator: React.FC = () => {
                     value={b.value}
                     type={b.type}
                     size={b.size}
+                    height={b.height}
                   />
                 </div>
               </li>
