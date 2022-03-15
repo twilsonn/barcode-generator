@@ -21,12 +21,16 @@ const Sidebar: React.FC = () => {
   const [barcodeTypeInput, setBarcodeTypeInput] =
     useState<BarcodeType>("code128");
   const [barcodeSizeInput, setBarcodeSizeInput] = useState<string>("3");
+  const [barcodeHeightInput, setBarcodeHeightInput] = useState<number>(3);
 
   const changeBarcodeTypeInput = (e: ChangeEvent<HTMLSelectElement>) =>
     setBarcodeTypeInput(e.target.value as BarcodeType);
 
   const changeBarcodeSizeInput = (e: ChangeEvent<HTMLInputElement>) =>
     setBarcodeSizeInput(e.target.value);
+
+  const changeBarcodeHeightInput = (e: ChangeEvent<HTMLInputElement>) =>
+    setBarcodeHeightInput(parseInt(e.target.value));
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -47,6 +51,7 @@ const Sidebar: React.FC = () => {
             id: uuid(),
             value: b,
             type: barcodeTypeInput,
+            height: 5 * barcodeHeightInput,
             size: parseInt(barcodeSizeInput),
           };
         })
@@ -113,15 +118,15 @@ const Sidebar: React.FC = () => {
             <Range
               id="barcode-height"
               name="barcode-height"
-              value={barcodeSizeInput}
-              onChange={changeBarcodeSizeInput}
+              value={barcodeHeightInput}
+              onChange={changeBarcodeHeightInput}
               title="Barcode Height"
               min="1"
               max="10"
               disabled={barcodeTypeInput === "qrcode"}
             />
 
-            <Range
+            {/* <Range
               id="barcode-grid-columns"
               name="barcode-grid-columns"
               value={barcodeSizeInput}
@@ -139,7 +144,7 @@ const Sidebar: React.FC = () => {
               title="Grid Gap"
               min="1"
               max="10"
-            />
+            /> */}
           </div>
         </div>
 
